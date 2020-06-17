@@ -1,9 +1,6 @@
-
-    let a ='';
-    function recursion(n) {
-        if(n == 0) return console.log(a);
-        a += n%10
-        recursion (parseInt(n / 10))
-    }
-
-  recursion(124)
+let item;
+function createItem(callback){
+    callback('콜백함수')
+}
+createItem((el) => item = el)
+console.log(item);
