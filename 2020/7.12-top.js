@@ -1,4 +1,4 @@
-function solution(heights) {
+function solution(heights) {//
     var answer = [];
     heights = heights.reverse();
    for(let i=0; i <= heights.length; i++) {
