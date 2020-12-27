@@ -1,11 +1,23 @@
 {
   "name": "algorithm",
   "version": "1.0.0",
-  "description": "",
+  "description": "> 1일 하나 이상의 알고리즘을 학습하고 풀이하고자 하는 목표로 만든 레포!",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "heesu",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "node": "^15.4.0"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dqdq4197/js-algorithm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dqdq4197/js-algorithm/issues"
+  },
+  "homepage": "https://github.com/dqdq4197/js-algorithm#readme"
 }
