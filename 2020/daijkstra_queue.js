@@ -24,48 +24,65 @@ rl.on('line', function (line) {
 
     input.splice(0, 2);
     
-    input.forEach((num) => {
+    input.forEach((num) => { 
       if(!graph[num[0]][0]) {
         graph[num[0]] = [[num[1], num[2]]]
       } else {
         graph[num[0]].push([num[1], num[2]]);
       }
     })
-    
+    // ↑ 입력 끝, 구현 시작
     
     function dijkstra(start) {
+      let heapq = [];
+    
       distance[start] = 0;
-
-      for(let i = 0; i < V; i++) {
-        let index = minDistanceIndex();
-        graph[index].forEach((num) => {
-          let cost = distance[index] + num[1]
-          if(distance[num[0]] > cost)  {
-            distance[num[0]] = cost;
+      enqueue(heapq, [start, 0])
+    
+      while(heapq.length) {
+        let [now, dist] = dequeue(heapq);
+    
+        if(distance[now] < dist) {
+          continue;
+        }
+        graph[now].forEach(q => {
+          let cost = dist + q[1];
+          if(distance[q[0]] > cost) {
+            distance[q[0]] = cost;
+            enqueue(heapq, [q[0], cost]);
           }
         })
       }
     }
 
-    function minDistanceIndex() {
-      let index = 1;
-      let min = inf;
-      for(let i = 1; i <= V; i++) {
-        if(distance[i] < min && !visit[i]) {
-          min = distance[i];
-          index = i;
-        }
-      }
-      visit[index] = true;
-      return index;
-    }
-
     dijkstra(K)
     distance.shift();
-    distance.map((dis) => dis === inf ? 'INF' : dis);
-    console.log(distance)
+    distance = distance.map((dist) => dist === inf ? 'INF' : dist);
+    distance.forEach(num => {
+      console.log(num)
+    })
     process.exit();
 });
+
+function enqueue(heapq, q) {
+  let isContain = false;
+  for(let i = 0; i <heapq.length; i++) {
+    if(heapq[i][1] < q[1]) {
+      heapq.splice(i, 0, q);
+      isContain = true;
+      return ;
+    }
+  }
+  if(!isContain) {
+    heapq.push(q);
+  }
+}
+
+function dequeue(heapq) {
+  if(heapq.length) {
+    return heapq.pop();
+  }
+}
 
   
   // Input
