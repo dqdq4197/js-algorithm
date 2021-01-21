@@ -6,18 +6,18 @@ const rl = readline.createInterface({
 let input = [];
 
 rl.on('line', function (line) {
-  input.push(line.split(' ').map(num => Number(num)));
+  input.push(line);
 })
 
 .on('close', function () {
   // 입력 받기
-  const N = input[0][0];
+  const N = input.shift();
   let table = [];
-  for(let i = 1; i < N + 1; i++) {
-    table.push(input[i]);
+  for(let i = 0; i < N; i++) {
+    table[i] = input[i].split('').map(v => Number(v))
   }
   
-  // 방문 초기화 --- 
+  // // 방문 초기화 --- 
   let v = Array.from({length: N}, () => []);
 
   for(let i = 0; i < N; i++) {
@@ -26,44 +26,43 @@ rl.on('line', function (line) {
     }
   }
 
+  let dx = [0, 0, 1, -1];
+  let dy = [1, -1, 0, 0];
   let queue = [];
   let answer = [];
 
   function dfs(row, col, num) {
-    if(!v[row][col]) {
-      v[row][col] = true;
-      num++;
+    queue.push([row, col])
+    v[row][col] = true;
+    num++;
+
+    while(queue.length) {
+      let [curX, curY] = queue.shift();
+      for(let i = 0; i < 4; i++) {
+        let nx = curX + dx[i];
+        let ny = curY + dy[i];
+
+        if(nx >= 0 && ny >= 0 && nx < N && ny < N){
+          if(!v[nx][ny] && table[nx][ny] === 1) {
+            queue.push([nx, ny]);
+            v[nx][ny] = true;
+            num ++;
+          }
+        }
+      }
     }
 
-    if(col + 1 !== N && !v[row][col + 1] && table[row][col + 1] === 1) {
-      queue.push([row, col + 1])
-    }
-    if(row + 1 !== N && !v[row + 1][col] && table[row + 1][col] === 1) {
-      queue.push([row + 1, col])
-    }
-    if(col - 1 >= 0 && !v[row][col - 1] && table[row][col - 1] === 1) {
-      queue.push([row, col - 1])
-    }
-    if(row - 1 >= 0 && !v[row - 1][col] && table[row - 1][col] === 1) {
-      queue.push([row - 1, col])
-    }
-
-    if(queue.length) {
-      let [r, c] = queue.pop();
-      dfs(r, c, num);
-    } else {
-      answer.push(num);
-    }
+    answer.push(num);
   }
 
   for(let i = 0; i < N; i++) {
     for(let j = 0; j < N; j++) {
-      if(table[i][j] === 1) {
+      if(table[i][j] === 1 && !v[i][j]) {
         dfs(i, j, 0);
-        table = table.map((r, i) => r.map((c,idx) => v[i][idx] === true ? 0 : c));
       }
     }
   }
+
   console.log(answer.length);
   answer.sort((a,b) => a - b);
   answer.forEach(num => console.log(num))
