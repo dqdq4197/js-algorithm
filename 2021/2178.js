@@ -16,7 +16,7 @@ rl.on('line', function (line) {
     [N, M] = line.split(' ').map(num => +num);
   } else {
     graph.push(line.split('').map(num => +num));
-    dist.push(line.split('').map(() => 999));
+    dist.push(line.split('').map(() => 10001));
   }
 
   if(N === graph.length) rl.close();
