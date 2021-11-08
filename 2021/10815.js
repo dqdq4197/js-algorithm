@@ -4,38 +4,44 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 let input = [];
+let sortedN = [];
+let answer = [];
 
-function binalySearch(arr, num) {
-  let l = 0;
-  let r = arr.length - 1;
-  let isContain = 0;
+function binalySearch(num) {
+  let min = 0;
+  let max = sortedN.length - 1;
 
-  while(l <= r) {
-    let mid = Math.floor((l + r) / 2);
-
-    if(arr[mid] === num) {
-      isContain = 1;
-      break;
-    } else if(arr[mid] > num) {
-      r = mid - 1;
+  while(min <= max) {
+    let mid = Math.floor((min + max) / 2);
+    
+    if(sortedN[mid] === num) {
+      return true;
+    } else if(sortedN[mid] < num) {
+      min = mid + 1;
     } else {
-      l = mid + 1;
+      max = mid - 1;
     }
   }
 
-  return isContain;
+  return false;
 }
 
 rl.on('line', function (line) {
-  input.push(line.split(' ').map(num => Number(num)));
+  input.push(line.split(' ').map(num => +num));
+  if(input.length === 4) {
+    rl.close();
+  }
 })
 
 .on('close', function () {
-  const NArr = input[1].sort((a,b) => a - b);
-  const MArr = input[3];
+  sortedN = input[1].sort((a, b) => a - b);
 
-  MArr.forEach(num => {
-    console.log(binalySearch(NArr, num))
+  input[3].forEach(num => {
+    let isContain = binalySearch(num);
+    answer.push(isContain ? 1 : 0);
   })
+
+  console.log(answer.join(' '));
+
   process.exit();
 });
