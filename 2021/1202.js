@@ -3,28 +3,47 @@ const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
-
+// max heap 문제
 let jewels = [];
-let queue = [];
+let queue = [0];
 let N, K;
 let result = 0;
 
-function enqueue(arr) {
-  let isContain = false;
-  for(let i = 0; i < queue.length; i++) {
-    if(queue[i][1] < arr[1]) {
-      queue.splice(i, 0, arr);
-      isContain = true;
-      break;
-    }
-  }
-  if(!isContain) {
-    queue.push(arr);
+function enqueue(num) {
+  queue.push(num);
+  let size = queue.length - 1;
+
+  while(size > 1 && queue[Math.floor(size / 2)] < queue[size]) {
+    let temp = queue[size];
+    queue[size] = queue[Math.floor(size / 2)];
+    queue[Math.floor(size / 2)] = temp;
+    size = Math.floor(size / 2);
   }
 }
 
 function dequeue() {
-  return queue.shift();
+  if(queue.length === 1) return undefined;
+  if(queue.length === 2) return queue.pop();
+  let removeItem = queue[1];
+  queue[1] = queue.pop();
+
+  let p = 1;
+  let c = 2;
+
+  while(c < queue.length) {
+    if(c + 1 < queue.length && queue[c + 1] > queue[c]) {
+      c = c + 1;
+    }
+    if(queue[c] <= queue[p]) break;
+
+    let temp = queue[c];
+    queue[c] = queue[p];
+    queue[p] = temp;
+    p = c;
+    c *= 2;
+  }
+
+  return removeItem;
 }
 
 rl.on('line', function (line) {
@@ -50,13 +69,12 @@ rl.on('line', function (line) {
 
   for(let i = 0; i < jewels.length; i++) {
     if(jewels[i][2] === 1) {
-      enqueue(jewels[i]);
+      enqueue(jewels[i][1]);
     } else {
-      if(queue.length) {
-        let jewel = dequeue();
+      let jewel = dequeue();
 
-        result += jewel[1];
-      }
+      if(!jewel) continue;
+      result += jewel;
     }
   }
 
