@@ -37,7 +37,7 @@ function dequeue(){
       childe *=2;
   }
   array[parent] = temp;
-  console.log(array);
+  // console.log(array);
   return remove;
 }
 
