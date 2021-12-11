@@ -13,7 +13,7 @@ function dfs(start, end) {
   visit[start] = true;
 
   while(queue.length) {
-    let [now, dist, maxDist] = queue.shift();
+    let [now, dist, maxDist] = queue.pop();
     if(now === end) {
       console.log(dist - maxDist);
       break;
