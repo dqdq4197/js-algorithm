@@ -4,25 +4,20 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 let N, M;
-let map = new Map();
+let S = new Set();
 let result = 0;
-let i = 0;
 
 rl.on('line', function (line) {
-  if(!N) {
+  if(N === undefined) {
     [N, M] = line.split(' ').map(n => +n);
+  } else if(N > 0) {
+    N--;
+    S.add(line);
   } else {
-    if(map.has(line)) {
-      result++;
-    } else {
-      map.set(line, true)
+    if(S.has(line)) result++;
+    if(--M === 0) {
+      console.log(result);
+      rl.close();
     }
-
-    if(++i === N + M) rl.close();
   }
 })
-
-.on('close', function () {
-  console.log(result);
-  process.exit();
-});
