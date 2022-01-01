@@ -9,6 +9,7 @@
   "author": "heesu",
   "license": "MIT",
   "dependencies": {
+    "fs": "0.0.1-security",
     "node": "^15.4.0"
   },
   "devDependencies": {},
