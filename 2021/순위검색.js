@@ -1,20 +1,87 @@
+function binarySearch(arr, num) {
+  let l = 0;
+  let r = arr.length - 1;
+  
+  while(l <= r) {
+      let mid = Math.floor((l + r) / 2);
+      
+      if(arr[mid] >= num) {
+          r = mid - 1;
+      } else {
+          l = mid + 1;
+      }
+  }
+  
+  return l
+}
+
 function solution(info, query) {
-  var answer = [];
-  let infoMap = new Map();
-  let queryMap = new Map();
+  let answer = [];
+  let rootNode = {
+      child: {}
+  }
+  
+  info.sort((a, b) => +a.split(' ')[4] - +b.split(' ')[4]);
   
   info.forEach(v => {
-      let temp = v.split(' ')
-      infoMap.set(temp.slice(0, 4).join(''), Number(...temp.slice(-1)));
+      let s = v.split(' ');
+      let currentNode = {...rootNode};
+      
+      for(let i = 0; i < s.length; i++) {
+          let key = s[i];
+          if(i === s.length - 1) {
+              if(Array.isArray(currentNode.child)) {
+                  currentNode.child = [...currentNode.child, +key];
+              } else {
+                  currentNode.child = [+key];
+              }
+              break;
+          }
+          
+          if(!currentNode.child[key]) {
+              currentNode.child[key] = { child: {} };
+          } 
+          
+          currentNode = currentNode.child[key];
+      }
   })
   
-  query.forEach(v => {
-    let temp = v.split(' ').filter(q => q !== 'and')
-    queryMap.set(temp.slice(0,4), temp.slice(-1))
+  query.forEach(q => {
+      let s = q.split(' and ');
+      s = [...s.slice(0, 3), ...s[3].split(' ')];
+      let nodes = [{...rootNode}];
+      let result = 0;
+      
+      for(let i = 0; i < s.length; i++) {
+          let key = s[i];
+          let stack = [...nodes];
+          if(i === s.length - 1) {
+              while(nodes.length) {
+                  let node = nodes.pop();
+                  
+                  result += node.child.length - binarySearch(node.child, +key);
+              }
+              break;
+          }
+          nodes = [];
+          while(stack.length) {
+              let node = stack.pop();
+              
+              if(node.child[key]) {
+                  nodes.push(node.child[key]);    
+              }
+              
+              if(key === '-') {
+                  for(let k in node.child) {
+                      nodes.push(node.child[k]);
+                  }
+              }
+          }
+      }
+      
+      answer.push(result);
   })
-  console.log(infoMap, queryMap)
-
-  
+  console.log(answer);
   return answer;
 }
 
