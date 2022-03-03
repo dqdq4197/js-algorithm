@@ -1,78 +1,125 @@
-const readline = require('readline');
+const readline = require("readline");
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
 
 let N;
+let input = [];
 let result = [];
-let pq1 = [null];
-let pq2 = [null];
 
-function enqueue(pq, num) {
-  pq.push(num);
-  let size = pq.length - 1;
+function minHeap(minQ) {
+  this.queue = minQ;
 
-  while(size > 1 && pq[Math.floor(size / 2)] < pq[size]) {
-    let temp = pq[size];
-    pq[size] = pq[Math.floor(size / 2)];
-    pq[Math.floor(size / 2)] = temp;
-    size = Math.floor(size / 2);
-  }
-}
+  this.getSize = () => this.queue.length;
 
-function dequeue(pq) {
-  let removeItem = pq[1];
-  pq[1] = pq.pop();
+  this.getQueue = () => this.queue;
 
-  let p = 1;
-  let c = 2;
+  this.getMin = () => this.queue[1];
 
-  while(c < pq.length) {
-    if(c + 1 < pq.length && pq[c + 1] > pq[c]) {
-      c = c + 1;
+  this.enqueue = (num) => {
+    this.queue.push(num);
+    let size = this.queue.length - 1;
+
+    while (size > 1 && this.queue[Math.floor(size / 2)] > this.queue[size]) {
+      let temp = this.queue[Math.floor(size / 2)];
+      this.queue[Math.floor(size / 2)] = this.queue[size];
+      this.queue[size] = temp;
+      size = Math.floor(size / 2);
     }
+  };
 
-    if(pq[c] <= pq[p]) break;
-    let temp = pq[c];
-    pq[c] = pq[p]
-    pq[p] = temp;
-    p = c;
-    c *= p;
-  }
+  this.dequeue = () => {
+    if (this.queue.length === 2) return this.queue.pop();
+    let removeItem = this.queue[1];
+    this.queue[1] = this.queue.pop();
+    let p = 1;
+    let c = 2;
 
-  return removeItem;
+    while (this.queue.length > c) {
+      if (this.queue.length > c + 1 && this.queue[c + 1] < this.queue[c]) {
+        c = c + 1;
+      }
+      if (this.queue[p] < this.queue[c]) break;
+      let temp = this.queue[c];
+      this.queue[c] = this.queue[p];
+      this.queue[p] = temp;
+      p = c;
+      c *= 2;
+    }
+    return removeItem;
+  };
 }
 
+function maxHeap(maxQ) {
+  this.queue = maxQ;
 
-rl.on('line', function (line) {
-  if(N === undefined) {
+  this.getSize = () => this.queue.length;
+
+  this.getMax = () => this.queue[1];
+
+  this.getQueue = () => this.queue;
+
+  this.enqueue = (num) => {
+    this.queue.push(num);
+    let size = this.queue.length - 1;
+
+    while (size > 1 && this.queue[Math.floor(size / 2)] < this.queue[size]) {
+      let temp = this.queue[Math.floor(size / 2)];
+      this.queue[Math.floor(size / 2)] = this.queue[size];
+      this.queue[size] = temp;
+      size = Math.floor(size / 2);
+    }
+  };
+
+  this.dequeue = () => {
+    if (this.queue.length === 2) return this.queue.pop();
+    let removeItem = this.queue[1];
+    this.queue[1] = this.queue.pop();
+    let p = 1;
+    let c = 2;
+
+    while (this.queue.length > c) {
+      if (this.queue.length > c + 1 && this.queue[c + 1] > this.queue[c]) {
+        c = c + 1;
+      }
+      if (this.queue[p] > this.queue[c]) break;
+      let temp = this.queue[c];
+      this.queue[c] = this.queue[p];
+      this.queue[p] = temp;
+      p = c;
+      c *= 2;
+    }
+    return removeItem;
+  };
+}
+
+rl.on("line", function (line) {
+  if (N === undefined) {
     N = +line;
   } else {
-    if(pq2.length > pq1.length) {
-      enqueue(pq1, +line);
-    } else {
-      enqueue(pq2, +line);
-    }
-    
-    if(pq1.length === 0) {
-      result.push(pq2[1]);
-    } else {
-      if(pq2[1] > pq1[1]) {
-        let q1 = dequeue(pq1);
-        let q2 = dequeue(pq2);
-        enqueue(pq1, q2);
-        enqueue(pq2, q1);
-      }
+    input.push(+line);
+    if (input.length === N) rl.close();
+  }
+}).on("close", function () {
+  const minH = new minHeap([null]);
+  const maxH = new maxHeap([null]);
 
-      result.push(pq2[1]);
-    }
-    N--;
-    if(N === 0) rl.close();
-  }  
-})
+  input.forEach((num) => {
+    if (minH.getSize() < maxH.getSize()) minH.enqueue(num);
+    else maxH.enqueue(num);
 
-.on("close", function () {
+    if (minH.getMin() < maxH.getMax()) {
+      let min = minH.dequeue();
+      let max = maxH.dequeue();
+
+      minH.enqueue(max);
+      maxH.enqueue(min);
+    }
+
+    result.push(maxH.getMax());
+  });
+
   console.log(result.join("\n"));
   process.exit();
 });
