@@ -1,54 +1,57 @@
-const readline = require('readline');
+const readline = require("readline");
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
 
-let map = [];
 let N, M;
-let dx = [0, 1, 0, -1];
-let dy = [1, 0, -1, 0];
-let result = -1;
+let map = [];
+let visit = [];
+const dx = [1, 0, -1, 0];
+const dy = [0, 1, 0, -1];
 
-rl.on('line', function (line) {
-  if(!N) {
-    [N, M] = line.split(' ').map(n => +n);
-  } else {
-    map.push(line.split('').map(n => +n));
-    if(map.length === N) rl.close();
-  }
-})
+function bfs(i, j) {
+  const queue = [[i, j, 1, 1]];
+  visit[i][j][1] = true;
+  let index = 0;
 
-.on('close', function () {
-  visit = Array.from({ length: N }, () => Array.from({ length: M }, () => Array(2).fill(false)));
+  while (queue.length > index) {
+    const [y, x, available, dist] = queue[index++];
+    if (y === N - 1 && x === M - 1) return dist;
 
-  let queue = [[0, 0, 1, 1]];
-  while(queue.length) {
-    let [x, y, available, dist] = queue.shift();
+    for (let i = 0; i < 4; i++) {
+      const nx = x + dx[i];
+      const ny = y + dy[i];
 
-    if(x === M - 1 && y === N - 1) {
-      result = dist;
-      break ;
-    }
-
-    for(let i = 0; i < 4; i++) {
-      let nx = x + dx[i];
-      let ny = y + dy[i];
-  
-      if(nx >= 0 && ny >= 0 && nx < M && ny < N && !visit[ny][nx][available]) {
-        if(map[ny][nx] === 1) {
-          if(available) {
-            visit[y][x][0] = true;
-            queue.push([nx, ny, 0, dist + 1])
+      if (nx >= 0 && ny >= 0 && nx < M && ny < N && !visit[ny][nx][available]) {
+        if (map[ny][nx] === 1) {
+          if (available) {
+            queue.push([ny, nx, 0, dist + 1]);
+            visit[ny][nx][0] = true;
           }
         } else {
           visit[ny][nx][available] = true;
-          queue.push([nx, ny, available, dist + 1])
+          queue.push([ny, nx, available, dist + 1]);
         }
       }
     }
   }
 
-  console.log(result);
-  process.exit();
+  return -1;
+}
+
+rl.on("line", function (line) {
+  if (!N) {
+    [N, M] = line.split(" ").map((n) => +n);
+    visit = Array.from({ length: N }, () =>
+      Array.from({ length: M }, () => Array(2).fill(false))
+    );
+  } else {
+    map.push(line.split("").map((n) => +n));
+    if (map.length === N) {
+      const result = bfs(0, 0);
+      console.log(result);
+      rl.close();
+    }
+  }
 });
