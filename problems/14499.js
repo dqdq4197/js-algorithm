@@ -1,84 +1,80 @@
-const readline = require('readline');
+const readline = require("readline");
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
-
+let N, M, x, y, K;
 let map = [];
-let N, M, x, y, K, move;
-let dice = {
-  '앞': 0,
-  '뒤': 0,
-  '상': 0,
-  '하': 0,
-  '좌': 0,
-  '우': 0
-}
-let dx = [1, -1, 0, 0];
-let dy = [0, 0, -1, 1];
+let dirs = [];
+const dx = [0, 1, -1, 0, 0];
+const dy = [0, 0, 0, -1, 1];
+const HDice = [0, 0, 0, 0]; // 상, 좌, 하, 우
+const VDice = [0, 0]; // 앞 뒤
+let result = [];
 
-rl.on('line', function (line) {
-  if(!N) {
-    [N, M, x, y, K] = line.split(' ').map(n => +n);
-  } else if(map.length !== N) {
-    map.push(line.split(' ').map(n => +n));
-  } else if(!move) {
-    move = line.split(' ').map(n => +n);
+function copy(y, x) {
+  if (map[y][x] === 0) {
+    map[y][x] = HDice[2];
+  } else {
+    HDice[2] = map[y][x];
+    map[y][x] = 0;
+  }
+}
+
+function move(dir) {
+  const nx = x + dx[dir];
+  const ny = y + dy[dir];
+
+  if (nx >= 0 && ny >= 0 && nx < M && ny < N) {
+    y = ny;
+    x = nx;
+
+    // 동
+    if (dir === 1) {
+      HDice.push(HDice.shift());
+      copy(ny, nx);
+    }
+    // 서
+    if (dir === 2) {
+      HDice.unshift(HDice.pop());
+      copy(ny, nx);
+    }
+    // 북
+    if (dir === 3) {
+      const up = HDice[0];
+      HDice[0] = VDice[1];
+      VDice[1] = HDice[2];
+      HDice[2] = VDice[0];
+      VDice[0] = up;
+      copy(ny, nx);
+    }
+    // 남
+    if (dir === 4) {
+      const up = HDice[0];
+      HDice[0] = VDice[0];
+      VDice[0] = HDice[2];
+      HDice[2] = VDice[1];
+      VDice[1] = up;
+      copy(ny, nx);
+    }
+
+    result += HDice[0] + "\n";
+  }
+}
+
+rl.on("line", function (line) {
+  if (!N) {
+    [N, M, y, x, K] = line.split(" ").map((n) => +n);
+  } else if (map.length !== N) {
+    map.push(line.split(" ").map((n) => +n));
+  } else {
+    dirs = line.split(" ").map((n) => +n);
+
+    for (let i = 0; i < K; i++) {
+      const dir = dirs[i];
+      move(dir);
+    }
+    console.log(result);
     rl.close();
   }
-})
-
-.on('close', function () {
-  for(let i = 0; i < K; i++) {
-    let dir = move[i];
-    let nx = x + dx[dir - 1];
-    let ny = y + dy[dir - 1];
-
-    if(nx < 0 || ny < 0 || nx >= M || ny >= N) continue;
-
-    x = nx; y = ny;
-    let copyDice = { ...dice };
-
-    switch(dir) {
-      case 1:
-        // 동
-        dice['하'] = copyDice['우'];
-        dice['우'] = copyDice['상'];
-        dice['상'] = copyDice['좌'];
-        dice['좌'] = copyDice['하'];
-        break;
-      case 2:
-        // 서
-        dice['하'] = copyDice['좌'];
-        dice['우'] = copyDice['하'];
-        dice['상'] = copyDice['우'];
-        dice['좌'] = copyDice['상'];
-        break;
-      case 3:
-        // 북
-        dice['하'] = copyDice['뒤'];
-        dice['앞'] = copyDice['하'];
-        dice['상'] = copyDice['앞'];
-        dice['뒤'] = copyDice['상'];
-        break;
-      case 4:
-        // 남
-        dice['하'] = copyDice['앞'];
-        dice['뒤'] = copyDice['하'];
-        dice['상'] = copyDice['뒤'];
-        dice['앞'] = copyDice['상'];
-        break;
-    }
-
-    if(map[ny][nx] === 0) {
-      map[ny][nx] = dice['하'];
-    } else {
-      dice['하'] = map[ny][nx];
-      map[ny][nx] = 0;
-    }
-    console.log(dice['상']);
-  }
-  
-  process.exit();
 });
-
