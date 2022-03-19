@@ -6,50 +6,49 @@ const rl = readline.createInterface({
 
 let T;
 let N;
-let graph = [];
-let check = [];
-
-function bfs(num, temp) {
-  let target = graph[num];
-
-  while (true) {
-    temp.push(target);
-    if (check[target] === false) {
-      temp.forEach((n) => (check[n] = false));
-      return;
-    }
-    if (num === target) {
-      temp.forEach((n) => (check[n] = true));
-      return;
-    }
-
-    if (target === graph[target]) {
-      temp.forEach((n) => (check[n] = false));
-      check[target] = true;
-      return;
-    }
-    target = graph[target];
-  }
-}
+let inDegree = [];
+let result = [];
 
 rl.on("line", function (line) {
   if (T === undefined) {
     T = +line;
   } else if (N === undefined) {
     N = +line;
-    graph = Array.from({ length: N + 1 }, () => 0);
-    check = Array.from({ length: N + 1 }, () => undefined);
+    inDegree = Array.from({ length: N + 1 }, () => 0);
   } else {
-    line.split(" ").forEach((target, i) => (graph[i + 1] = +target));
+    const input = [0, ...line.split(" ").map((n) => +n)];
+    let queue = [];
+    let cnt = 0;
+
+    input.forEach((num) => {
+      inDegree[num] += 1;
+    });
+
     for (let i = 1; i <= N; i++) {
-      if (check[i] === undefined) {
-        bfs(i, [i]);
+      if (inDegree[i] === 0) {
+        queue.push(i);
+        inDegree[i] = -1;
       }
     }
-    const result = check.slice(1).filter((bool) => !bool).length;
-    console.log(result);
-    T -= 1;
-    N = undefined;
-    if (T === 0) rl.close();
+
+    while (queue.length) {
+      const num = queue.pop();
+      const nextNum = input[num];
+      cnt += 1;
+
+      inDegree[nextNum] -= 1;
+      if (inDegree[nextNum] === 0) {
+        queue.push(nextNum);
+        inDegree[nextNum] = -1;
+      }
+    }
+    result.push(cnt);
+
+    if (--T === 0) {
+      console.log(result.join("\n"));
+      rl.close();
+    } else {
+      N = undefined;
+    }
   }
 });
