@@ -1,62 +1,60 @@
-const readline = require('readline');
+const readline = require("readline");
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
 
 let T;
-let input = [];
-let commands = ['D', 'S', 'L', 'R'];
+let result = [];
+const commands = ["D", "S", "L", "R"];
 
-function search([A, B]) {
-  let queue = [[A, '']];
-  let visit = Array.from({ length: 10001 }, () => false);
-  visit[A] = true;
+function convert(a, b) {
+  let visit = [];
+  visit[a] = true;
+  const queue = [[a, ""]];
 
-  while(queue.length) {
-    let [n, c] = queue.shift();
+  while (queue.length) {
+    const [num, history] = queue.shift();
 
-    for(let i = 0; i < commands.length; i++) {
-      let newN = n;
-      switch(commands[i]) {
-        case 'D':
-          newN = n * 2 % 10000;
+    for (let i = 0; i < commands.length; i++) {
+      let nextNum = num;
+      switch (commands[i]) {
+        case "D":
+          nextNum = (nextNum * 2) % 10000;
           break;
-        case 'S':
-          newN -= 1;
-          if(newN === 0) newN = 9999;
+        case "S":
+          nextNum -= 1;
+          if (nextNum < 0) nextNum = 9999;
           break;
-        case 'L':
-          newN = newN % 1000 * 10  + Math.floor(newN / 1000);
+        case "L":
+          nextNum = (nextNum % 1000) * 10 + Math.floor(nextNum / 1000);
           break;
-        case 'R':
-          newN = newN % 10 * 1000 + Math.floor(newN / 10);
+        case "R":
+          nextNum = Math.floor(nextNum / 10) + (nextNum % 10) * 1000;
           break;
       }
-
-      if(newN === B) {
-        return c + commands[i];
-      } else if(!visit[newN]) {
-        visit[newN] = true; 
-        queue.push([newN, c + commands[i]]);
+      if (nextNum === b) {
+        return history + commands[i];
+      } else {
+        if (!visit[nextNum]) {
+          queue.push([nextNum, history + commands[i]]);
+          visit[nextNum] = true;
+        }
       }
     }
   }
 }
 
-rl.on('line', function (line) {
-  if(!T) {
-    T = +line;
-  } else {
-    input.push(line.split(' ').map(n => +n));
-    if(input.length === T) rl.close();
-  }
-})
+rl.on("line", function (line) {
+  if (!T) T = +line;
+  else {
+    const [a, b] = line.split(" ").map((n) => +n);
+    const history = convert(a, b);
+    result += history + "\n";
 
-.on('close', function () {
-  for(let i = 0; i < T; i++) {
-    console.log(search(input[i]));
+    if (--T === 0) {
+      console.log(result);
+      rl.close();
+    }
   }
-
-  process.exit();
 });
