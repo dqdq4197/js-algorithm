@@ -1,6 +1,9 @@
-let queue = [0];
+const readline = require("readline");
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
 
-// min heap
 function minHeap(Q) {
   this.queue = Q;
 
@@ -16,6 +19,7 @@ function minHeap(Q) {
   };
 
   this.dequeue = () => {
+    if (this.queue.length === 1) return 0;
     if (this.queue.length === 2) return this.queue.pop();
     let removeNum = this.queue[1];
     this.queue[1] = this.queue.pop();
@@ -38,41 +42,23 @@ function minHeap(Q) {
   };
 }
 
-// max heap
+let N;
+let minQ;
+let result = [];
 
-function enqueue(num) {
-  queue.push(num);
-  let size = queue.length - 1;
-
-  while (size > 1 && queue[Math.floor(size / 2)] < queue[size]) {
-    let temp = queue[size];
-    queue[size] = queue[Math.floor(size / 2)];
-    queue[Math.floor(size / 2)] = temp;
-    size = Math.floor(size / 2);
-  }
-}
-
-function dequeue() {
-  if (queue.length === 1) return undefined;
-  if (queue.length === 2) return queue.pop();
-  let removeItem = queue[1];
-  queue[1] = queue.pop();
-
-  let p = 1;
-  let c = 2;
-
-  while (c < queue.length) {
-    if (c + 1 < queue.length && queue[c + 1] > queue[c]) {
-      c = c + 1;
+rl.on("line", function (line) {
+  if (!N) {
+    N = +line;
+    minQ = new minHeap([null]);
+  } else {
+    if (+line === 0) {
+      result.push(minQ.dequeue());
+    } else {
+      minQ.enqueue(+line);
     }
-    if (queue[c] <= queue[p]) break;
-
-    let temp = queue[c];
-    queue[c] = queue[p];
-    queue[p] = temp;
-    p = c;
-    c *= 2;
+    if (--N === 0) {
+      console.log(result.join("\n"));
+      rl.close();
+    }
   }
-
-  return removeItem;
-}
+});
