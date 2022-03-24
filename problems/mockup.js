@@ -1,15 +1,18 @@
-const readline = require('readline');
+const readline = require("readline");
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
+
+let N, M;
 let input = [];
 
-rl.on('line', function (line) {
-  input.push(line);
-})
-
-.on('close', function () {
-
+rl.on("line", function (line) {
+  if (!N) {
+    [N, M] = line.split(" ");
+  } else {
+    input.push(line);
+  }
+}).on("close", function () {
   process.exit();
 });
