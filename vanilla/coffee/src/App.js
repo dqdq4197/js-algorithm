@@ -16,7 +16,7 @@ function App({ $app }) {
   };
 
   initRoute(this.route);
-  window.addEventListener("popstate", this.state);
+  window.addEventListener("popstate", this.route);
   this.route();
 }
 

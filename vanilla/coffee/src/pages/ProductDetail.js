@@ -3,9 +3,10 @@ import request from "../utils/request.js";
 function ProductDetail({ $app, productId }) {
   this.state = {
     productId,
-    product: null,
+    product: localStorage.get("sd") ? localStorage.get("sd") : [],
     selectedProducts: [],
   };
+
   this.$target = document.createElement("div");
   this.$target.className = "ProductDetailPage";
 
@@ -16,6 +17,8 @@ function ProductDetail({ $app, productId }) {
     console.log(this.state.selectedProducts[0]);
     this.render();
   };
+
+  this.setState(this.state);
 
   this.onSelectChange = (e) => {
     console.log(e);
