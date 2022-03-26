@@ -1,82 +1,79 @@
-const readline = require('readline');
+const readline = require("readline");
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
 
-let N
+let N;
 let M = 0;
 let graph = [];
 let inDegree = [];
-let result = 1001;
 let total = 0;
+let visit = [];
 
-function check(visit) {
-  let v = visit.slice();
-  let queue = [];
-  for(let i = 0; i < v.length; i++) {
-    if(!v[i]) {
+function check() {
+  const cp_visit = [...visit];
+  console.log(cp_visit);
+  const queue = [];
+  for (let i = 1; i <= N; i++) {
+    if (!cp_visit[i]) {
       queue.push(i);
+      cp_visit[i] = true;
       break;
     }
   }
 
-  while(queue.length) {
-    let now = queue.shift();
+  let index = 0;
+  while (queue.length > index) {
+    const now = queue[index++];
 
-    graph[now].forEach(n => {
-      if(!v[n]) {
-        v[n] = true;
-        queue.push(n);
+    graph[now].forEach((next) => {
+      if (!cp_visit[next]) {
+        queue.push(next);
+        cp_visit[next] = true;
       }
-    })
+    });
   }
-  
-  return v.findIndex(b => b === false) === -1 ? true : false;
+  // console.log(cp_visit);
+
+  return cp_visit.slice(1).indexOf(false) === -1;
 }
 
-rl.on('line', function (line) {
-  if(!N) {
+function dfs(start, cnt) {
+  // console.log("cc", cnt);
+  if (!check()) return;
+  else {
+    console.log(cnt);
+  }
+
+  graph[start].forEach((next) => {
+    if (!visit[next]) {
+      visit[next] = true;
+      dfs(next, cnt + inDegree[next]);
+      visit[next] = false;
+    }
+  });
+}
+
+rl.on("line", function (line) {
+  if (!N) {
     N = +line;
     graph = Array.from({ length: N + 1 }, () => []);
-  } else if(inDegree.length === 0){
-    inDegree = line.split(' ').map(n => +n);
+  } else if (inDegree.length === 0) {
+    inDegree = [0, ...line.split(" ").map((n) => +n)];
     total = inDegree.reduce((a, b) => a + b);
   } else {
     M++;
-    let [cnt, ...nums] = line.split(' ').map(n => +n);
-    nums.forEach(num => graph[num].push(M));
-    if(N === M) rl.close();
+    let [_, ...nums] = line.split(" ").map((n) => +n);
+    nums.forEach((num) => graph[num].push(M));
+    if (N === M) rl.close();
   }
-})
-
-.on('close', function() {
-  for(let i = 1; i <= N; i++) {
-    let visit = Array.from({ length: N + 1 }, () => false);
-    visit[0] = true;
+}).on("close", function () {
+  for (let i = 4; i <= 4; i++) {
+    visit = Array.from({ length: N + 1 }, () => false);
     visit[i] = true;
-
-    function dfs(now, v) {
-      if(v.filter(b => b === false).length <= 1) return;
-      graph[now].forEach(n => {
-        if(!v[n]) {
-          v[n] = true;
-          dfs(n, v);
-          const isPossible = check(v);
-          if(isPossible) {
-            let sum = 0;
-            for(let j = 1; j <= N; j++) {
-              if(v[j]) sum += inDegree[j - 1];
-            }
-            result = Math.min(result, Math.abs(total - 2 * sum));
-          }
-          v[n] = false;
-        }
-      })
-    }
-    dfs(i, visit);
+    dfs(i, inDegree[i]);
   }
-
-  console.log(result === 1001 ? -1 : result);
+  console.log(graph);
   process.exit;
 });
