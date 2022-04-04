@@ -5,22 +5,28 @@ const rl = readline.createInterface({
 });
 
 let N;
-let H, A;
+let H = [];
+let A = [];
 let result = 0;
 
 rl.on("line", function (line) {
   if (!N) {
     N = +line;
-  } else if (!H) {
-    H = line.split(" ").map(Number);
+  } else if (H.length === 0) {
+    H = line.split(" ").map((n) => +n);
   } else {
-    A = line.split(" ").map(Number);
+    A = line.split(" ").map((n) => +n);
 
-    const trees = H.map((n, i) => [n, A[i]]);
-    trees.sort((a, b) => a[1] - b[1]);
+    const sortedA = A.slice().sort((a, b) => a - b);
+    const trees = [];
 
-    for (let i = 0; i < N; i++) {
-      result += trees[i][0] + trees[i][1] * i;
+    for (let i = 0; i < sortedA.length; i++) {
+      const index = A.indexOf(sortedA[i]);
+      trees.push(H[index]);
+    }
+
+    for (let i = 0; i < trees.length; i++) {
+      result += trees[i] + sortedA[i] * i;
     }
 
     console.log(result);
