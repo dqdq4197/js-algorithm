@@ -7,49 +7,60 @@ const rl = readline.createInterface({
 let N, M;
 let input = [];
 
-function MinHeap(Q) {
-  this.queue = Q;
+class MinHeap {
+  constructor() {
+    this.queue = [null];
+  }
 
-  this.enqueue = (num) => {
-    this.queue.push(num);
-    let p = this.queue.length - 1;
-    while (p > 1 && this.queue[Math.floor(p / 2)] > this.queue[p]) {
-      let temp = this.queue[Math.floor(p / 2)];
-      this.queue[Math.floor(p / 2)] = this.queue[p];
-      this.queue[p] = temp;
-      p = Math.floor(p / 2);
+  enqueue(n) {
+    this.queue.push(n);
+    let size = this.queue.length - 1;
+
+    while (size > 1 && this.queue[Math.floor(size / 2)] > this.queue[size]) {
+      [this.queue[Math.floor(size / 2)], this.queue[size]] = [
+        this.queue[size],
+        this.queue[Math.floor(size / 2)],
+      ];
+      size = Math.floor(size / 2);
     }
-  };
+  }
 
-  this.dequeue = () => {
-    if (this.queue.length === 2) return this.queue.pop();
-    let removeNum = this.queue[1];
+  dequeue() {
+    if (this.queue.length === 1) {
+      return null;
+    }
+    if (this.queue.length === 2) {
+      return this.queue.pop();
+    }
+    const removeItem = this.queue[1];
     this.queue[1] = this.queue.pop();
     let p = 1;
     let c = 2;
 
     while (c < this.queue.length) {
-      if (c + 1 < this.queue.length && this.queue[c] > this.queue[c + 1]) {
-        c = c + 1;
+      if (c + 1 < this.queue.length && this.queue[c + 1] < this.queue[c]) {
+        c += 1;
       }
-      if (this.queue[p] < this.queue[c]) break;
-      let temp = this.queue[c];
-      this.queue[c] = this.queue[p];
-      this.queue[p] = temp;
+
+      if (this.queue[p] <= this.queue[c]) {
+        break;
+      }
+
+      [this.queue[p], this.queue[c]] = [this.queue[c], this.queue[p]];
       p = c;
       c *= 2;
     }
 
-    return removeNum;
-  };
+    return removeItem;
+  }
 }
 
 rl.on("line", function (line) {
   if (!N) {
     [N, M] = line.split(" ").map(Number);
   } else {
-    input = line.split(" ").map(Number);
-    const minHeap = new MinHeap([null]);
+    input = line.split(" ").map(BigInt);
+    const minHeap = new MinHeap();
 
     input.forEach((n) => minHeap.enqueue(n));
 
@@ -61,7 +72,12 @@ rl.on("line", function (line) {
       minHeap.enqueue(sum);
     }
 
-    console.log(minHeap.queue.slice(1).reduce((a, b) => a + b, 0));
+    console.log(
+      minHeap.queue
+        .slice(1)
+        .reduce((a, b) => a + b, 0n)
+        .toString()
+    );
     rl.close();
   }
 });
