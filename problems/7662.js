@@ -1,3 +1,8 @@
+/**
+ * 백준 - 이중 우선순위 큐
+ * https://www.acmicpc.net/problem/7662
+ */
+
 const readline = require("readline");
 const rl = readline.createInterface({
   input: process.stdin,
@@ -6,132 +11,120 @@ const rl = readline.createInterface({
 
 let T;
 let N;
-let minQ, maxQ;
-let valid = {};
+let minHeap, maxHeap;
+let store;
 
-function minHeap(Q) {
-  this.queue = Q;
+class PriorityQueue {
+  constructor(compare = (a, b) => a - b) {
+    this.queue = [null];
+    this.compare = compare;
+  }
 
-  this.size = () => this.queue.length - 1;
-  this.getMin = () => this.queue[1];
+  size() {
+    return this.queue.length - 1;
+  }
 
-  this.enqueue = (num) => {
-    this.queue.push(num);
+  peek() {
+    return this.queue[1] ?? null;
+  }
+
+  enqueue(item) {
+    this.queue.push(item);
     let size = this.queue.length - 1;
 
-    while (size > 1 && this.queue[Math.floor(size / 2)] > this.queue[size]) {
-      const temp = this.queue[Math.floor(size / 2)];
-      this.queue[Math.floor(size / 2)] = this.queue[size];
-      this.queue[size] = temp;
+    while (
+      size > 1 &&
+      this.compare(this.queue[Math.floor(size / 2)], this.queue[size]) > 0
+    ) {
+      [this.queue[Math.floor(size / 2)], this.queue[size]] = [
+        this.queue[size],
+        this.queue[Math.floor(size / 2)],
+      ];
       size = Math.floor(size / 2);
     }
-  };
+  }
 
-  this.dequeue = () => {
-    if (this.queue.length === 2) return this.queue.pop();
+  dequeue() {
+    if (this.size() === 0) return null;
+    if (this.size() === 1) return this.queue.pop();
     const removeItem = this.queue[1];
     this.queue[1] = this.queue.pop();
     let p = 1;
     let c = 2;
 
     while (this.queue.length > c) {
-      if (this.queue.length > c + 1 && this.queue[c + 1] < this.queue[c]) {
-        c = c + 1;
+      if (
+        this.queue.length > c + 1 &&
+        this.compare(this.queue[c + 1], this.queue[c]) < 0
+      ) {
+        c += 1;
       }
 
-      if (this.queue[c] > this.queue[p]) break;
-      const temp = this.queue[c];
-      this.queue[c] = this.queue[p];
-      this.queue[p] = temp;
+      if (this.compare(this.queue[p], this.queue[c]) < 0) {
+        break;
+      }
+
+      [this.queue[p], this.queue[c]] = [this.queue[c], this.queue[p]];
       p = c;
       c *= 2;
     }
 
     return removeItem;
-  };
+  }
 }
 
-function maxHeap(Q) {
-  this.queue = Q;
+function validPeek(heap) {
+  while (heap.size()) {
+    const peek = heap.peek();
 
-  this.size = () => this.queue.length - 1;
-  this.getMax = () => this.queue[1];
-
-  this.enqueue = (num) => {
-    this.queue.push(num);
-    let size = this.queue.length - 1;
-
-    while (size > 1 && this.queue[Math.floor(size / 2)] < this.queue[size]) {
-      const temp = this.queue[Math.floor(size / 2)];
-      this.queue[Math.floor(size / 2)] = this.queue[size];
-      this.queue[size] = temp;
-      size = Math.floor(size / 2);
-    }
-  };
-
-  this.dequeue = () => {
-    if (this.queue.length === 2) return this.queue.pop();
-    const removeItem = this.queue[1];
-    this.queue[1] = this.queue.pop();
-    let p = 1;
-    let c = 2;
-
-    while (this.queue.length > c) {
-      if (this.queue.length > c + 1 && this.queue[c + 1] > this.queue[c]) {
-        c = c + 1;
-      }
-
-      if (this.queue[c] < this.queue[p]) break;
-      const temp = this.queue[c];
-      this.queue[c] = this.queue[p];
-      this.queue[p] = temp;
-      p = c;
-      c *= 2;
+    if (store[peek]) {
+      return peek;
     }
 
-    return removeItem;
-  };
+    heap.dequeue();
+  }
+
+  return null;
 }
 
 rl.on("line", function (line) {
-  if (T === undefined) {
+  if (!T) {
     T = +line;
   } else if (!N) {
     N = +line;
-    minQ = new minHeap([null]);
-    maxQ = new maxHeap([null]);
+    minHeap = new PriorityQueue((a, b) => a - b);
+    maxHeap = new PriorityQueue((a, b) => b - a);
+    store = {};
   } else {
-    const [op, num] = line.split(" ");
+    const [op, n] = line.split(" ");
+    const num = +n;
 
     if (op === "I") {
-      minQ.enqueue(+num);
-      maxQ.enqueue(+num);
-
-      if (valid[+num]) {
-        valid[+num]++;
-      } else {
-        valid[+num] = 1;
-      }
+      minHeap.enqueue(num);
+      maxHeap.enqueue(num);
+      store[num] = (store[num] ?? 0) + 1;
     }
 
     if (op === "D") {
-      if (num === "1") {
-        while (maxQ.size()) {
-          const number = maxQ.dequeue();
+      if (num === 1) {
+        // 최댓값에서 제거
+        while (maxHeap.size()) {
+          const remove = maxHeap.dequeue();
 
-          if (valid[number] > 0) {
-            valid[number]--;
+          if (store[remove] === 0) {
+            store[remove] -= 1;
             break;
           }
         }
       }
 
-      if (num === "-1") {
-        while (minQ.size()) {
-          const number = minQ.dequeue();
+      if (num === -1) {
+        // 최솟값에서 제거
+        while (minHeap.size()) {
+          const remove = minHeap.dequeue();
 
-          if (valid[number] > 0) {
-            valid[number]--;
+          if (store[remove]) {
+            store[remove] -= 1;
             break;
           }
         }
@@ -139,27 +132,15 @@ rl.on("line", function (line) {
     }
 
     if (--N === 0) {
-      let result = "EMPTY";
+      const min = validPeek(minHeap);
+      const max = validPeek(maxHeap);
 
-      while (maxQ.size()) {
-        const number = maxQ.dequeue();
-
-        if (valid[number] > 0) {
-          result = number;
-          break;
-        }
+      if (min === null || max === null) {
+        console.log("EMPTY");
+      } else {
+        console.log(`${max} ${min}`);
       }
 
-      while (minQ.size()) {
-        const number = minQ.dequeue();
-
-        if (valid[number] > 0) {
-          result += ` ${number}`;
-          break;
-        }
-      }
-
-      console.log(result);
       if (--T === 0) {
         rl.close();
       }
