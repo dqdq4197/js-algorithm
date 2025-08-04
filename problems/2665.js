@@ -1,42 +1,55 @@
-const readline = require('readline');
+/**
+ * 백준 - bfs / 다익스트라
+ * https://www.acmicpc.net/problem/2665
+ */
+
+const readline = require("readline");
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
 
 let graph = [];
 let dist = [];
-let N = 0;
-const dx = [-1, 0 , 1, 0];
+let N;
+const dx = [-1, 0, 1, 0];
 const dy = [0, -1, 0, 1];
 
-rl.on('line', function (line) {
-  if(N === 0) {
+rl.on("line", function (line) {
+  if (!N) {
     N = +line;
   } else {
-    graph.push(line.split('').map(num => +num));
-    dist.push(line.split('').map(() => 999));
+    graph.push(line.split("").map(Number));
+    dist.push(line.split("").map(() => Infinity));
+
+    if (graph.length === N) {
+      rl.close();
+    }
   }
-
-  if(N === graph.length) rl.close();
-})
-
-.on('close', function () {
-  let queue = [];
+}).on("close", function () {
   dist[0][0] = 0;
-  queue.push([0, 0]);
-  while(queue.length) {
-    let [x, y] = queue.shift();
+  const queue = [[0, 0]];
 
-    for(let i = 0; i < 4; i++) {
+  let index = 0;
+  while (queue.length > index) {
+    let [x, y] = queue[index++];
+
+    for (let i = 0; i < 4; i++) {
       const nx = x + dx[i];
       const ny = y + dy[i];
-      if(nx < 0 || nx >= N || ny < 0 || ny >= N) continue;
 
-      if(dist[x][y] >= dist[nx][ny]) continue;
-      
-      dist[nx][ny] = graph[nx][ny] === 0 ? dist[x][y] + 1 : dist[x][y];
-      queue.push([nx, ny])
+      if (nx < 0 || nx >= N || ny < 0 || ny >= N) {
+        continue;
+      }
+
+      const nDist = graph[nx][ny] === 0 ? dist[x][y] + 1 : dist[x][y];
+
+      if (nDist >= dist[nx][ny]) {
+        continue;
+      }
+
+      dist[nx][ny] = nDist;
+      queue.push([nx, ny]);
     }
   }
 
