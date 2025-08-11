@@ -1,9 +1,28 @@
 /**
- * 크루스칼 알고리즘 => union-find 알고리즘 포함
- * 모든 노드를 연결할 떄 최소비용
- * 결과는 반드시 노드의 갯수 - 1개의 간선으로 이루어진다.
+ * 최소 스패닝 트리 (크루스칼 알고리즘)
+ * 모든 정점들을 연결하는 부분 그래프 중에서 그 가중치 합이 최소인 트리
+ *
+ * 무방향 그래프에서 싸이클이 발생하지 않는 것을 원칙으로 한다.
+ * 따라서 싸이클을 감지하기 위해 union-find 알고리즘이 함께 사용된다.
  * @see union-find.js
+ *
+ * 결과는 반드시 노드의 개수 - 1개의 간선으로 이루어진다.
  */
+
+const N = 6;
+/**
+ * (1) -- 5 -- (2)
+ *    \        / |
+ *     4      2  |
+ *       \   /   |
+ *        (3)    7
+ *       /   \   |
+ *     11     6  |
+ *    /         \|
+ *  (5) -- 3 -- (4) -- 8 -- (6)
+ *   └─--------- 8 ----------┘
+ */
+
 const edges = [
   [1, 2, 5],
   [1, 3, 4],
@@ -15,44 +34,62 @@ const edges = [
   [4, 6, 8],
   [5, 6, 8],
 ];
-const nodeCnt = 6;
-let parents = Array.from({ length: nodeCnt + 1 }, (_, i) => i);
 
-function getParent(num) {
-  if (parents[num] === num) return num;
-  return (parents[num] = getParent(parents[num]));
-}
+class UnionFind {
+  constructor(n) {
+    this.parents = Array.from({ length: n + 1 }, (_, i) => i);
+  }
 
-function unionParent(a, b) {
-  const aParent = getParent(a);
-  const bParent = getParent(b);
-  if (aParent > bParent) parents[aParent] = bParent;
-  else parents[bParent] = aParent;
-}
+  find(node) {
+    if (this.parents[node] === node) return node;
+    return (this.parents[node] = this.find(this.parents[node]));
+  }
 
-function findParent(a, b) {
-  const aParent = getParent(a);
-  const bParent = getParent(b);
+  union(a, b) {
+    const aParent = this.find(a);
+    const bParent = this.find(b);
 
-  if (aParent === bParent) return true;
-  else return false;
+    if (aParent === bParent) {
+      return false;
+    }
+
+    if (aParent > bParent) {
+      this.parents[aParent] = bParent;
+    } else {
+      this.parents[bParent] = aParent;
+    }
+
+    return true;
+  }
+
+  connected(a, b) {
+    return this.find(a) === this.find(b);
+  }
 }
 
 function kruskal() {
   edges.sort((a, b) => a[2] - b[2]);
-  let sum = 0;
-  let cnt = 0;
+
+  let totalCost = 0;
+  let connectedEdgeCount = 0;
+  const mst = [];
+  const unionFind = new UnionFind(N);
+
   for (let i = 0; i < edges.length; i++) {
     const [a, b, cost] = edges[i];
 
-    if (!findParent(a, b)) {
-      sum += cost;
-      unionParent(a, b);
-      cnt += 1;
+    if (unionFind.union(a, b)) {
+      totalCost += cost;
+      connectedEdgeCount += 1;
+      mst.push([a, b]);
     }
-    // 노드의 갯수보다 -1개로 이루어지기 때문에 종료
-    if (cnt === nodeCnt - 1) return sum;
+
+    if (connectedEdgeCount === N - 1) {
+      break;
+    }
   }
+
+  return [totalCost, mst];
 }
 
 console.log(kruskal());
