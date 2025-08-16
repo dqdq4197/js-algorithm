@@ -3,10 +3,9 @@
  * https://leetcode.com/problems/reverse-integer/description/
  */
 
-const min = -Math.pow(2, 31);
-const max = -min - 1;
-
 function reverse(x: number): number {
+  const min = -Math.pow(2, 31);
+  const max = -min - 1;
   const isNegative = x < 0;
   const reversed = Number(Math.abs(x).toString().split("").reverse().join(""));
 
