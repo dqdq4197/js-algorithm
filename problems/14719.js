@@ -1,46 +1,55 @@
-const readline = require('readline');
+/**
+ * 백준 - 시뮬레이션
+ * https://www.acmicpc.net/problem/14719
+ */
+
+const readline = require("readline");
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
 
-let arr = [];
-let answer = 0;
+const MAX_HEIGHT = 500;
+
+let heights = [];
 let H = 0;
 let W = 0;
 
-rl.on('line', function (line) {
-  if(!W) {
-    [H, W] = line.split(' ').map(num => +num);
+rl.on("line", function (line) {
+  if (!W) {
+    [H, W] = line.split(" ").map(Number);
   } else {
-    arr = line.split(' ').map(num => +num);
-  }
-  if(arr.length) {
+    heights = line.split(" ").map(Number);
     rl.close();
   }
-})
+}).on("close", function () {
+  const leftMax = [];
+  const rightMax = [];
+  let total = 0;
 
-.on('close', function () {
-  let startH = arr[0];
-  let startIndex = 0;
-  let prevH = arr[0];
+  let max = 0;
+  for (let i = 0; i < W; i++) {
+    const height = heights[i];
 
-  for(let i = 1; i < W; i++) {
-    if(prevH < arr[i]) {
-      let sum = 0;
-      let standard = Math.min(startH, arr[i]);
-      for(let k = startIndex + 1; k < i; k++) {
-        sum += standard - arr[k];
-      }
-      console.log(startH, startIndex, prevH, i, sum)
-      startIndex = i;
-      startH = arr[i];
-      prevH = arr[i];
-      answer += sum;
-    } else {
-      prevH = arr[i];
-    }
+    max = Math.max(max, height);
+    leftMax[i] = max;
   }
 
-  process.exit();
+  max = 0;
+  for (let i = W - 1; i >= 0; i--) {
+    const height = heights[i];
+
+    max = Math.max(max, height);
+    rightMax[i] = max;
+  }
+
+  for (let i = 0; i < W; i++) {
+    const height = heights[i];
+    const water = Math.min(leftMax[i], rightMax[i]) - height;
+
+    if (water <= 0) continue;
+    total += water;
+  }
+
+  console.log(total);
 });
